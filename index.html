@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en"<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Medicine Reminder</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 400px;
+      margin: 40px auto;
+      padding: 20px;
+      border-radius: 10px;
+      background: #f4f8fb;
+      box-shadow: 0 2px 8px #ccc;
+    }
+    h1 {
+      text-align: center;
+      color: #3a6ea5;
+    }
+    label {
+      font-weight: bold;
+    }
+    button {
+      display: block;
+      margin: 20px auto;
+      padding: 10px 20px;
+      background: #3a6ea5;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1em;
+    }
+    button:hover {
+      background: #1c4d7a;
+    }
+    .message {
+      text-align: center;
+      margin-top: 10px;
+      color: green;
+    }
+  </style>
+</head>
+<body>
+  <h1>Medicine Reminder</h1>
+  <form id="reminderForm">
+    <label>
+      Medicine Name:
+      <input type="text" id="medicineName" value="Metformin" required />
+    </label><br><br>
+    <label>
+      Time (HH:MM, 24h):
+      <input type="time" id="reminderTime" value="08:00" required />
+    </label><br><br>
+    <button type="submit">Set Reminder</button>
+  </form>
+  <div class="message" id="message"></div>
+  <script>
+    document.getElementById("reminderForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      let medName = document.getElementById("medicineName").value;
+      let reminderTime = document.getElementById("reminderTime").value;
+
+      // Request notification permission
+      if (Notification.permission !== "granted") {
+        Notification.requestPermission();
+      }
+
+      document.getElementById("message").textContent =
+        `Reminder set for ${medName} at ${reminderTime}.`;
+
+      // Calculate time till reminder
+      let now = new Date();
+      let [hours, minutes] = reminderTime.split(":");
+      let reminderDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes, 0, 0);
+
+      // If the reminder time has already passed today, set for tomorrow
+      if (reminderDate < now) {
+        reminderDate.setDate(reminderDate.getDate() + 1);
+      }
+      let timeToReminder = reminderDate - now;
+
+      setTimeout(function() {
+        if (Notification.permission === "granted") {
+          new Notification("Medicine Reminder", {
+            body: `Time to take your medicine: ${medName}`,
+            icon: "https://cdn-icons-png.flaticon.com/512/2921/2921822.png"
+          });
+        } else {
+          alert(`Time to take your medicine: ${medName}`);
+        }
+      }, timeToReminder);
+    });
+  </script>
+</body>
+</html>
